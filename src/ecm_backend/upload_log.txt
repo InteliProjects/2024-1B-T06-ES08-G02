@@ -1,0 +1,10 @@
+test0.txt,Mon Jun 10 04:39:18 2024,19,txt,False,0.015018224716186523
+test1.txt,Mon Jun 10 04:39:20 2024,19,txt,False,0.010902881622314453
+test2.txt,Mon Jun 10 04:39:23 2024,19,txt,False,0.0
+test3.txt,Mon Jun 10 04:39:26 2024,19,txt,False,0.0
+test4.txt,Mon Jun 10 04:39:28 2024,19,txt,False,0.0
+test5.txt,Mon Jun 10 04:39:30 2024,19,txt,False,0.004323244094848633
+test6.txt,Mon Jun 10 04:39:33 2024,19,txt,False,0.0
+test7.txt,Mon Jun 10 04:39:36 2024,19,txt,False,0.0063169002532958984
+test8.txt,Mon Jun 10 04:39:38 2024,19,txt,False,0.0
+test9.txt,Mon Jun 10 04:39:41 2024,19,txt,False,0.0

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de arquivos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <img src="{{ url_for('static', filename='images/bofa-logo.png') }}" alt="Bank of America Logo">
+            <h1>ECM - Gerenciador de arquivos</h1>
+            <a href="http://localhost:5002" class="dashboard-btn">
+                <img src="{{ url_for('static', filename='images/dashboard.png') }}" alt="Dashboard Icon"
+                    style="width: 20px; height: 20px;">
+                Dashboard
+            </a>
+        </header>
+        <main>
+            <div class="search-bar">
+                <input type="text" placeholder="Pesquisar arquivos">
+                <button>Buscar</button>
+            </div>
+            <div class="filter-bar">
+                <label for="filter-by">Filtrar por:</label>
+                <select id="filter-by">
+                    <option value="all">Todos</option>
+                    <option value="name">Nome</option>
+                    <option value="date">Data</option>
+                    <option value="type">Tipo</option>
+                    <option value="size">Tamanho</option>
+                </select>
+            </div>
+            <div class="file-list">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Data</th>
+                            <th>Tipo</th>
+                            <th>Tamanho</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for file in files %}
+                        <tr>
+                            <td>{{ file.name }}</td>
+                            <td>{{ file.date }}</td>
+                            <td>{{ file.type }}</td>
+                            <td>{{ file.size }} bytes</td>
+                            <td>
+                                <div class="file-actions">
+                                    <form action="{{ url_for('uploaded_file', filename=file.name) }}" method="POST"
+                                        class="file-access-form">
+                                        <input type="password" class="readPassword" name="password" placeholder="Senha"
+                                            required>
+                                        <button type="submit">Visualizar</button>
+                                    </form>
+                                    <a href="{{ url_for('uploaded_file', filename=file.name) }}" download>Fazer
+                                        download</a>
+                                    <a href="{{ url_for('delete_file', filename=file.name) }}" delete>Excluir</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <form id="upload-form" action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+                <div class="upload-area" id="upload-area">
+                    <p>Arrastar e soltar arquivos aqui para upload</p>
+                    <label for="file-input">Escolher arquivo</label>
+                    <input type="file" name="file" class="file-input" id="file-input" required />
+                    <input type="password" name="password" placeholder="Senha" required>
+                    <button type="submit">Enviar</button>
+                </div>
+            </form>
+            <div class="upload-history">
+                <h2>Histórico de Uploads</h2>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Nome do Arquivo</th>
+                            <th>Tamanho</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                        <tr>
+                            <td>{{ log.date }}</td>
+                            <td>{{ log.name }}</td>
+                            <td>{{ log.size }} bytes</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <div id="resultado"></div>
+            <div id="pdfViewer-modal" class="pdf-viewer-modal"></div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const uploadForm = document.getElementById('upload-form');
+            const fileAccessForms = document.querySelectorAll('.file-access-form');
+            const modal = document.getElementById('modal');
+            const closeButton = document.querySelector('.close-button');
+
+            function openModal() {
+                modal.style.display = 'block';
+            }
+
+            function closeModal() {
+                modal.style.display = 'none';
+            }
+
+            window.onclick = function (event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            }
+
+            closeButton.onclick = closeModal;
+
+            uploadForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+                const fileInput = document.getElementById('file-input');
+                const file = fileInput.files[0];
+                const formData = new FormData(uploadForm);
+                fetch(uploadForm.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        const resultadoDiv = document.getElementById('resultado');
+                        resultadoDiv.innerHTML = '';
+                        if (data.error) {
+                            resultadoDiv.innerHTML = '<p>Erro ao processar o documento. Por favor, tente novamente.</p>';
+                        } else {
+                            resultadoDiv.innerHTML = '<p>Documento processado com sucesso.</p>';
+                            for (const key in data.metadata) {
+                                resultadoDiv.innerHTML += `<p>${key}: ${data.metadata[key]}</p>`;
+                            }
+
+                            const pdfViewerDiv = document.getElementById('pdfViewer-modal');
+                            pdfViewerDiv.innerHTML = '';
+
+                            const fileURL = URL.createObjectURL(file);
+                            const loadingTask = pdfjsLib.getDocument(fileURL);
+                            loadingTask.promise.then(pdf => {
+                                for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+                                    pdf.getPage(pageNumber).then(page => {
+                                        const viewport = page.getViewport({ scale: 1.5 });
+                                        const canvas = document.createElement('canvas');
+                                        canvas.height = viewport.height;
+                                        canvas.width = viewport.width;
+                                        const context = canvas.getContext('2d');
+
+                                        const renderContext = {
+                                            canvasContext: context,
+                                            viewport: viewport
+                                        };
+                                        pdfViewerDiv.appendChild(canvas);
+                                        page.render(renderContext);
+                                    });
+                                }
+                            });
+                            openModal();
+                        }
+                    })
+                    .catch(error => console.error('Erro:', error));
+            });
+
+            fileAccessForms.forEach(form => {
+                form.addEventListener('submit', function (event) {
+                    if (form.getAttribute('data-submitted') === 'true') {
+                        event.preventDefault();
+                    } else {
+                        form.setAttribute('data-submitted', 'true');
+                    }
+                });
+            });
+
+            const eventSource = new EventSource('/updates');  
+
+            eventSource.onmessage = function (event) {
+                const files = JSON.parse(event.data);  
+                updateFileList(files);  
+            };
+
+            
+            function updateFileList(files) {
+                const fileListElement = document.querySelector('.file-list tbody');
+                fileListElement.innerHTML = '';  
+
+                files.forEach(function (file) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${file.name}</td>
+                        <td>${file.date}</td>
+                        <td>${file.type}</td>
+                        <td>${file.size} bytes</td>
+                        <td>
+                            <div class="file-actions">
+                                <form action="/uploads/${file.name}" method="POST" class="file-access-form">
+                                    <input type="password" class="readPassword" name="password" placeholder="Senha" required>
+                                    <button type="submit">Visualizar</button>
+                                </form>
+                                <a href="/uploads/${file.name}" download>Fazer download</a>
+                                <a href="/delete/${file.name}" delete>Excluir</a>
+                            </div>
+                        </td>
+                    `;
+                    fileListElement.appendChild(row);  
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

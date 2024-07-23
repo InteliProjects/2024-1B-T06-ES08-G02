@@ -1,0 +1,291 @@
+/* Estilo geral */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+  color: gray;
+}
+
+.container {
+  width: 90%;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+header img {
+  height: 50px;
+}
+
+header h1 {
+  font-size: 24px;
+  color: #004b87; /* Cor do tema do Bank of America */
+}
+
+/* Barra de pesquisa */
+.search-bar {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.search-bar input[type="text"] {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px 0 0 4px;
+}
+
+.search-bar button {
+  padding: 10px;
+  background-color: #004b87; /* Cor do tema do Bank of America */
+  color: #fff;
+  border: 1px solid #004b87;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+}
+
+.filter-bar {
+  margin-bottom: 20px;
+}
+
+.filter-bar label {
+  margin-right: 10px;
+}
+
+.filter-bar select {
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Tabela */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  border-radius: 50%;
+}
+
+.table th, .table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.table th {
+  background-color: #004b87; /* Cor do tema do Bank of America */
+  color: #fff;
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+/* Área de upload */
+.upload-area {
+  border: 2px dashed #ccc;
+  border-radius: 4px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.upload-area p {
+  margin: 0;
+  padding: 0;
+}
+
+.upload-area label {
+  display: block;
+  margin: 10px 0;
+  cursor: pointer;
+  color: #004b87; /* Cor do tema do Bank of America */
+}
+
+.upload-area input[type="file"] {
+  display: none;
+}
+
+.upload-area button {
+  padding: 10px 20px;
+  background-color: #004b87; /* Cor do tema do Bank of America */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Histórico de uploads */
+.upload-history h2 {
+  font-size: 20px;
+  color: #004b87; /* Cor do tema do Bank of America */
+  margin-bottom: 10px;
+}
+
+.upload-history table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.upload-history th, .upload-history td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.upload-history th {
+  background-color: #004b87; /* Cor do tema do Bank of America */
+  color: #fff;
+}
+
+.upload-history tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+/* Modal */
+.modal {
+  display: none; /* Escondido por padrão */
+  position: fixed; /* Fica fixo na tela */
+  z-index: 1; /* Fica acima de outros elementos */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0, 0, 0); /* Fallback color */
+  background-color: rgba(0, 0, 0, 0.4); /* Preto com opacidade */
+  padding-top: 60px;
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 5% auto; /* 15% de cima e centralizado horizontalmente */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Largura do modal */
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  position: relative;
+  animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.close-button {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Estilo do conteúdo do modal */
+.pdf-viewer-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pdf-viewer-modal canvas {
+  margin-bottom: 20px;
+}
+
+#resultado p {
+  margin: 10px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.dashboard-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  text-decoration: none;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.dashboard-btn:hover {
+  background-color: #0056b3;
+}
+
+.dashboard-btn img {
+  margin-right: 5px;
+  width: 20px;
+  height: 20px;
+}
+
+/* Estilo do campo de senha */
+.readPassword {
+  width: calc(100% - 150px); /* Ajusta o tamanho do campo de senha */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+.file-actions a, .file-actions button {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-right: 10px;
+  font-size: 14px;
+  margin-top: 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.file-actions a {
+  text-decoration: none;
+  color: gray;
+}
+
+.file-actions a[download] {
+  color: #77dd77;
+  border: solid 1px #77dd77;
+}
+
+.file-actions a[delete] {
+  color: #ff6961;
+  border: solid 1px #ff6961;
+}
+
+.file-actions button {
+  border: solid 1px #004b87;
+  background-color: #fff;
+  color: #004b87;
+  padding: 10px 20px;
+}
+
+.file-actions a:hover, .file-actions button:hover {
+  background-color: #f0f0f0;
+}

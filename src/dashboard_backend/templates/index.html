@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard de Monitoramento</title>
+  
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    header {
+      background-color: #002d72;
+      color: #fff;
+      padding: 1em;
+      text-align: center;
+      margin-bottom: 2em;
+    }
+    h1 {
+      font-size: 2em;
+    }
+    .container {
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+    }
+    canvas {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2em;
+    }
+    table {
+      width: 100%;
+      margin-bottom: 2em;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #002d72;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Dashboard de Monitoramento</h1>
+    </header>
+    <main>
+      <div class="row">
+        <div class="col-md-6">
+          <canvas id="uploadsChart"></canvas>
+        </div>
+        <div class="col-md-6">
+          <canvas id="availabilityChart"></canvas>
+        </div>
+        <div class="col-md-12">
+          <canvas id="speedChart"></canvas>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <h2>Detalhes das Requisições</h2>
+          <table id="logsTable">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Data</th>
+                <th>Tamanho</th>
+                <th>Erro Forjado</th>
+                <th>Velocidade de Upload (s)</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <script>
+    let uploadsChart, availabilityChart, speedChart;
+
+    function destroyChart(chart) {
+      if (chart) {
+        chart.destroy();
+      }
+    }
+
+    function createChart(ctx, type, data, options) {
+      return new Chart(ctx, {
+        type: type,
+        data: data,
+        options: options
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('{{ url_for("monitor") }}')
+        .then(response => response.json())
+        .then(data => {
+          
+          const uploadsLabels = Object.keys(data.uploads_per_day);
+          const uploadsData = Object.values(data.uploads_per_day);
+          const uploadsChartCtx = document.getElementById('uploadsChart').getContext('2d');
+
+          destroyChart(uploadsChart);
+          uploadsChart = createChart(uploadsChartCtx, 'bar', {
+            labels: uploadsLabels,
+            datasets: [{
+              label: 'Uploads por Dia',
+              data: uploadsData,
+              backgroundColor: 'rgba(54, 162, 235, 0.6)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1
+            }]
+          }, {
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          });
+
+          
+          const availabilityLabels = uploadsLabels;
+          const successData = uploadsData;
+          const errorData = Object.values(data.errors_per_day);
+          const availabilityChartCtx = document.getElementById('availabilityChart').getContext('2d');
+
+          destroyChart(availabilityChart);
+          availabilityChart = createChart(availabilityChartCtx, 'line', {
+            labels: availabilityLabels,
+            datasets: [
+              {
+                label: 'Uploads Bem-Sucedidos',
+                data: successData,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                fill: false
+              },
+              {
+                label: 'Erros de Upload',
+                data: errorData,
+                backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                fill: false
+              }
+            ]
+          }, {
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          });
+
+          
+          const speedLabels = Object.keys(data.average_speeds_per_day);
+          const speedData = Object.values(data.average_speeds_per_day);
+          const speedChartCtx = document.getElementById('speedChart').getContext('2d');
+
+          destroyChart(speedChart);
+          speedChart = createChart(speedChartCtx, 'line', {
+            labels: speedLabels,
+            datasets: [{
+              label: 'Velocidade Média de Upload (segundos)',
+              data: speedData,
+              backgroundColor: 'rgba(153, 102, 255, 0.6)',
+              borderColor: 'rgba(153, 102, 255, 1)',
+              fill: false
+            }]
+          }, {
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          });
+
+          
+          const logsTableBody = document.getElementById('logsTable').querySelector('tbody');
+          logsTableBody.innerHTML = '';
+          data.logs.forEach(log => {
+            const row = `<tr>
+                          <td>${log.name}</td>
+                          <td>${log.date}</td>
+                          <td>${log.size}</td>
+                          <td>${log.erro_forjado}</td>
+                          <td>${log.upload_speed}</td>
+                        </tr>`;
+            logsTableBody.innerHTML += row;
+          });
+        });
+    });
+  </script>
+</body>
+</html>
